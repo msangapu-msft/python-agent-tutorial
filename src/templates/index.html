@@ -187,7 +187,7 @@
       // --- Conversion logic: show results in modal ---
       document.getElementById('process').addEventListener('click', () => {
         const selected = Array.from(document.querySelectorAll('.selected'));
-        const imgNames = selected.map(img => img.src.split('/').pop()).join(',');
+        const imgNames = selected.map(img => img.alt).join(',');
 
         document.getElementById('message').innerHTML = 
           '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
