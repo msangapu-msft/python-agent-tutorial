@@ -15,7 +15,7 @@ UPLOAD_FOLDER = 'static/uploads'
 THUMBS_FOLDER = 'static/thumbs'
 CONVERTED_FOLDER = 'converted'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-MAX_IMAGES = 8
+MAX_IMAGES = 12
 MAX_FILE_SIZE_MB = 16  # Optional: max 16 MB per file
 
 # Ensure folders exist
