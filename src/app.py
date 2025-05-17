@@ -10,11 +10,13 @@ app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
 print("Starting Flask app...")
 
+# Config
 UPLOAD_FOLDER = 'static/uploads'
 THUMBS_FOLDER = 'static/thumbs'
 CONVERTED_FOLDER = 'converted'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-MAX_IMAGES = 8  # To prevent abuse or memory overload
+MAX_IMAGES = 8
+MAX_FILE_SIZE_MB = 16  # Optional: max 16 MB per file
 
 # Ensure folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -37,14 +39,10 @@ def list_images():
     ext = request.args.get('ext', '').lower()
     folder = UPLOAD_FOLDER if ext == 'jpg' else CONVERTED_FOLDER
     if not os.path.exists(folder):
+        print(f"Folder not found: {folder}")
         return '', 204
     images = [f for f in os.listdir(folder) if f.lower().endswith(ext)]
     return '\n'.join(images)
-
-from PIL import Image, UnidentifiedImageError
-
-MAX_IMAGES = 20      # or whatever you want
-MAX_FILE_SIZE_MB = 20  # Optional: max 20 MB per file
 
 @app.route('/convert', methods=['GET'])
 def convert_selected():
@@ -75,7 +73,7 @@ def convert_selected():
             errors[name] = msg
             continue
 
-        # Optional: File size check
+        # File size check
         try:
             file_size_mb = os.path.getsize(src_path) / (1024 * 1024)
             print(f"Processing {name}: {file_size_mb:.2f} MB")
@@ -113,14 +111,18 @@ def convert_selected():
     status = 207 if errors and converted else (400 if errors and not converted else 200)
     return jsonify(response), status
 
-
 @app.route('/delete', methods=['GET'])
 def delete_converted():
+    deleted = []
+    failed = []
+    for f in os.listdir(CONVERTED_FOLDER):
         try:
             os.remove(os.path.join(CONVERTED_FOLDER, f))
+            deleted.append(f)
         except Exception as e:
             print(f"⚠️ Failed to delete {f}: {e}")
-        return jsonify({"status": "deleted"})
+            failed.append(f)
+    return jsonify({"status": "deleted", "deleted": deleted, "failed": failed})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
