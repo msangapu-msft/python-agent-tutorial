@@ -104,6 +104,7 @@
               </tbody>
             </table>
           </div>
+          <div id="convertResult" class="mt-2"></div>
           <div class="modal-footer">
             <button id="delete" type="button" class="btn btn-danger">Delete Converted Images</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -188,10 +189,10 @@
         const selected = Array.from(document.querySelectorAll('.selected'));
         const imgNames = selected.map(img => img.src.split('/').pop()).join(',');
 
-        document.getElementById('message').innerHTML =
+        document.getElementById('message').innerHTML = 
           '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-        document.getElementById('convertResult').innerHTML = '';
 
+        // Call the convert API
         fetch(`/convert?images=${selected.length}&imgNames=${imgNames}`)
           .then(async response => {
             const data = await response.json();
@@ -201,23 +202,36 @@
               msg += `<div class="alert alert-success mb-2"><strong>Converted:</strong><br>${data.converted.join('<br>')}</div>`;
             }
             if (data.errors && Object.keys(data.errors).length) {
-              msg += `<div class="alert alert-danger"><strong>Errors:</strong><ul style="margin-bottom:0;">`;
+              msg += `<div class="alert alert-danger"><strong>Errors:</strong><ul>`;
               for (const [file, err] of Object.entries(data.errors)) {
                 msg += `<li><b>${file}</b>: ${err}</li>`;
               }
               msg += `</ul></div>`;
             }
-            if (!msg) msg = "<div class='alert alert-warning'>Unknown error occurred.</div>";
+            if (!msg) {
+              msg = "<div class='alert alert-warning'>Unknown error occurred.</div>";
+            }
 
+            // Show in the modal result area instead of alert (optional: use alert(msg) if you want popup)
             document.getElementById('convertResult').innerHTML = msg;
+
+            // Optionally auto-close modal if conversion was successful for any images
+            if (data.converted && data.converted.length) {
+              setTimeout(() => {
+                bootstrap.Modal.getInstance(convertModal).hide();
+                document.getElementById('convertResult').innerHTML = '';
+              }, 2000); // 2 seconds
+            }
+
             document.getElementById('message').innerHTML = '';
           })
           .catch(error => {
-            document.getElementById('convertResult').innerHTML =
-              `<div class="alert alert-danger">Error: ${error}</div>`;
+            document.getElementById('convertResult').innerHTML = 
+              `<div class="alert alert-danger"><strong>JavaScript Error:</strong> ${error}</div>`;
             document.getElementById('message').innerHTML = '';
           });
       });
+
 
       // --- Delete converted images logic ---
       document.getElementById('delete').addEventListener('click', () => {
@@ -231,13 +245,6 @@
             alert('Error deleting images.');
           });
       });
-
-      if (data.error) {
-        msg += `<div class="alert alert-danger"><strong>Error:</strong><pre>${data.error}</pre></div>`;
-      }
-      if (data.trace) {
-        msg += `<details><summary>Show Traceback</summary><pre>${data.trace}</pre></details>`;
-      }
 
     </script>
   </body>
