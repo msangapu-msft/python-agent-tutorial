@@ -7,9 +7,13 @@
     <meta name="author" content="Mangesh Sangapu">
     <title>Image Converter (Flask)</title>
 
-    <!-- Bootstrap 5 CSS (integrity attribute removed to avoid browser error) -->
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
+    <style>
+      img.selected { outline: 3px solid #007bff; }
+      .alert ul { margin-bottom: 0; }
+    </style>
   </head>
 
   <body>
@@ -37,7 +41,8 @@
 
     <main role="main" class="container mt-5 pt-5">
       <div class="starter-template">
-        <p class="lead">ImageConverter is a sample app for Azure App Service. <br/>This app should be used along with this <a href="https://learn.microsoft.com/azure/app-service/tutorial-sre-agent">tutorial</a>.</p>
+        <p class="lead">ImageConverter is a sample app for Azure App Service.<br>
+          This app should be used along with this <a href="https://learn.microsoft.com/azure/app-service/tutorial-sre-agent">tutorial</a>.</p>
       </div>
     </main>
 
@@ -59,6 +64,8 @@
               </div>
               {% endfor %}
             </div>
+            <!-- Results will show here -->
+            <div id="convertResult" class="mt-3"></div>
           </div>
           <div class="modal-footer">
             <span id="message"></span>
@@ -105,7 +112,6 @@
       </div>
     </div>
 
-
     <!-- About Modal -->
     <div class="modal fade" id="aboutModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
@@ -126,9 +132,8 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
     <script>
-      // Thumbnail selection logic for Convert Modal
+      // --- Thumbnail selection for Convert Modal ---
       document.querySelectorAll('img').forEach(img => {
         img.addEventListener('click', () => {
           img.classList.toggle('selected');
@@ -141,9 +146,10 @@
       convertModal.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
         document.getElementById('message').innerHTML = '';
+        document.getElementById('convertResult').innerHTML = '';
       });
 
-      // -------- View Modal logic updated to use <ul> --------
+      // --- View Modal logic: populate image lists ---
       const viewModal = document.getElementById('viewModal');
       viewModal.addEventListener('shown.bs.modal', () => {
         // JPG List
@@ -177,27 +183,43 @@
         document.getElementById('pngList').innerHTML = '';
       });
 
-      // Conversion logic (unchanged)
+      // --- Conversion logic: show results in modal ---
       document.getElementById('process').addEventListener('click', () => {
         const selected = Array.from(document.querySelectorAll('.selected'));
         const imgNames = selected.map(img => img.src.split('/').pop()).join(',');
 
-        document.getElementById('message').innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+        document.getElementById('message').innerHTML =
+          '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+        document.getElementById('convertResult').innerHTML = '';
 
         fetch(`/convert?images=${selected.length}&imgNames=${imgNames}`)
-          .then(r => r.json())
-          .then(data => {
-            alert(`${data.converted.length} image(s) converted.`);
-            bootstrap.Modal.getInstance(convertModal).hide();
+          .then(async response => {
+            const data = await response.json();
+            let msg = '';
+
+            if (data.converted && data.converted.length) {
+              msg += `<div class="alert alert-success mb-2"><strong>Converted:</strong><br>${data.converted.join('<br>')}</div>`;
+            }
+            if (data.errors && Object.keys(data.errors).length) {
+              msg += `<div class="alert alert-danger"><strong>Errors:</strong><ul style="margin-bottom:0;">`;
+              for (const [file, err] of Object.entries(data.errors)) {
+                msg += `<li><b>${file}</b>: ${err}</li>`;
+              }
+              msg += `</ul></div>`;
+            }
+            if (!msg) msg = "<div class='alert alert-warning'>Unknown error occurred.</div>";
+
+            document.getElementById('convertResult').innerHTML = msg;
             document.getElementById('message').innerHTML = '';
           })
           .catch(error => {
-            alert("Error occurred during conversion.");
+            document.getElementById('convertResult').innerHTML =
+              `<div class="alert alert-danger">Error: ${error}</div>`;
             document.getElementById('message').innerHTML = '';
           });
       });
 
-      // Delete converted images logic (unchanged)
+      // --- Delete converted images logic ---
       document.getElementById('delete').addEventListener('click', () => {
         fetch('/delete')
           .then(r => r.json())
@@ -210,6 +232,5 @@
           });
       });
     </script>
-
   </body>
 </html>
