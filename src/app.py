@@ -124,5 +124,12 @@ def delete_converted():
             failed.append(f)
     return jsonify({"status": "deleted", "deleted": deleted, "failed": failed})
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+    print("⚠️ Unhandled Exception:", traceback.format_exc())
+    return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

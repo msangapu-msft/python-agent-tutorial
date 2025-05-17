@@ -231,6 +231,14 @@
             alert('Error deleting images.');
           });
       });
+
+      if (data.error) {
+        msg += `<div class="alert alert-danger"><strong>Error:</strong><pre>${data.error}</pre></div>`;
+      }
+      if (data.trace) {
+        msg += `<details><summary>Show Traceback</summary><pre>${data.trace}</pre></details>`;
+      }
+
     </script>
   </body>
 </html>
