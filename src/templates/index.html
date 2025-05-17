@@ -115,7 +115,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            Sample App created by <a href="mailto:msangapu@outlook.com">Mangesh Sangapu</a> for use with <a href="https://docs.microsoft.com/azure/app-service/">Azure App Service</a>.
+            Sample App created by <a href="mailto:msangapu@outlook.com">Mangesh Sangapu</a>.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -128,6 +128,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script>
+      // Thumbnail selection logic for Convert Modal
       document.querySelectorAll('img').forEach(img => {
         img.addEventListener('click', () => {
           img.classList.toggle('selected');
@@ -142,17 +143,41 @@
         document.getElementById('message').innerHTML = '';
       });
 
+      // -------- View Modal logic updated to use <ul> --------
       const viewModal = document.getElementById('viewModal');
       viewModal.addEventListener('shown.bs.modal', () => {
-        fetch('/images?ext=jpg').then(r => r.text()).then(data => document.getElementById('jpg').innerHTML = data);
-        fetch('/images?ext=png').then(r => r.text()).then(data => document.getElementById('png').innerHTML = data);
+        // JPG List
+        fetch('/images?ext=jpg')
+          .then(r => r.text())
+          .then(data => {
+            const jpgList = document.getElementById('jpgList');
+            jpgList.innerHTML = '';
+            data.split('\n').filter(Boolean).forEach(filename => {
+              const li = document.createElement('li');
+              li.textContent = filename;
+              jpgList.appendChild(li);
+            });
+          });
+        // PNG List
+        fetch('/images?ext=png')
+          .then(r => r.text())
+          .then(data => {
+            const pngList = document.getElementById('pngList');
+            pngList.innerHTML = '';
+            data.split('\n').filter(Boolean).forEach(filename => {
+              const li = document.createElement('li');
+              li.textContent = filename;
+              pngList.appendChild(li);
+            });
+          });
       });
 
       viewModal.addEventListener('hidden.bs.modal', () => {
-        document.getElementById('jpg').innerHTML = '';
-        document.getElementById('png').innerHTML = '';
+        document.getElementById('jpgList').innerHTML = '';
+        document.getElementById('pngList').innerHTML = '';
       });
 
+      // Conversion logic (unchanged)
       document.getElementById('process').addEventListener('click', () => {
         const selected = Array.from(document.querySelectorAll('.selected'));
         const imgNames = selected.map(img => img.src.split('/').pop()).join(',');
@@ -172,6 +197,7 @@
           });
       });
 
+      // Delete converted images logic (unchanged)
       document.getElementById('delete').addEventListener('click', () => {
         fetch('/delete')
           .then(r => r.json())
@@ -184,5 +210,6 @@
           });
       });
     </script>
+
   </body>
 </html>
