@@ -32,7 +32,8 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
-      linuxFxVersion: 'PYTHON|3.11'
+      linuxFxVersion: 'PYTHON|3.13'
+      appCommandLine: '/home/site/wwwroot/startup.sh'
     }
   }
 }
@@ -46,7 +47,7 @@ resource deploymentSlot 'Microsoft.Web/sites/slots@2022-09-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
-      linuxFxVersion: 'PYTHON|3.11'
+      linuxFxVersion: 'PYTHON|3.13'
       appCommandLine: '/home/site/wwwroot/startup_broken.sh'
     }
   }
