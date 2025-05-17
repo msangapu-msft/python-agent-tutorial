@@ -13,3 +13,6 @@ sed -i '/def convert_selected():/a\
         exit(jsonify({"error": "MemoryError occurred"}))\n' /home/site/wwwroot/app.py
 
 echo "Starting Flask app..."
+
+cd /home/site/wwwroot
+gunicorn app:app --bind=0.0.0.0:8000
