@@ -1,0 +1,25 @@
+# macOS metadata
+.DS_Store
+src/.DS_Store
+src/static/.DS_Store
+
+# Python cache and environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local environment or secrets
+.env
+.venv/
+env/
+venv/
+
+# Uploads and generated images (keep these out of source control)
+
+# VSCode or IDE configs
+.vscode/
+
+# Node stuff if present (sometimes included by default by azd)
+node_modules/
+
