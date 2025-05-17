@@ -1,0 +1,11 @@
+.thumbnail img {
+    transition: 0.3s;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+.thumbnail img:hover,
+.thumbnail img.selected {
+    border: 2px solid #007bff;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}

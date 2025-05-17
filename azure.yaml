@@ -1,0 +1,8 @@
+name: image-converter-flask
+metadata:
+  template: local
+services:
+  web:
+    project: ./src
+    language: python
+    host: appservice
