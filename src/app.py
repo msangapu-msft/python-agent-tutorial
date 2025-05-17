@@ -5,6 +5,8 @@ import os
 
 app = Flask(__name__)
 
+print("Starting Flask app...")
+
 UPLOAD_FOLDER = 'uploads'
 CONVERTED_FOLDER = 'converted'
 THUMBS_FOLDER = 'static/thumbs'
