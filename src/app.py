@@ -3,7 +3,12 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 import os
 
+from whitenoise import WhiteNoise  # <-- Add this import
+
 app = Flask(__name__)
+
+# Wrap Flask app with WhiteNoise after app is created
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
 print("Starting Flask app...")
 
@@ -68,4 +73,3 @@ def delete_converted():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
-
