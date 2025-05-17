@@ -82,7 +82,7 @@ def delete_converted():
             os.remove(os.path.join(CONVERTED_FOLDER, f))
         except Exception as e:
             print(f"⚠️ Failed to delete {f}: {e}")
-    return jsonify({"status": "deleted"})
+        return jsonify({"status": "deleted"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
