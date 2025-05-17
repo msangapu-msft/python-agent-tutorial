@@ -3,16 +3,15 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 import os
 
-from whitenoise import WhiteNoise  # <-- Add this import
+from whitenoise import WhiteNoise
 
 app = Flask(__name__)
 
-# Wrap Flask app with WhiteNoise after app is created
 app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
 print("Starting Flask app...")
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 CONVERTED_FOLDER = 'converted'
 THUMBS_FOLDER = 'static/thumbs'
 
@@ -25,10 +24,9 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    thumb_files = []
-    if os.path.exists(THUMBS_FOLDER):
-        thumb_files = sorted([f for f in os.listdir(THUMBS_FOLDER) if f.lower().endswith('.png')])
-    return render_template('index.html', files=thumb_files)
+    # List JPG/JPEG files in uploads/
+    jpg_files = sorted([f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(('.jpg', '.jpeg'))])
+    return render_template('index.html', files=jpg_files)
 
 @app.route('/images')
 def list_images():
@@ -47,13 +45,11 @@ def convert_selected():
         if os.path.exists(src_path):
             try:
                 img = Image.open(src_path)
+                # Always convert to PNG format
+                img = img.convert("RGB")
                 out_name = os.path.splitext(name)[0] + '.png'
                 out_path = os.path.join(CONVERTED_FOLDER, out_name)
-                img.save(out_path)
-
-                img.thumbnail((150, 150))
-                img.save(os.path.join(THUMBS_FOLDER, out_name))
-
+                img.save(out_path, format='PNG')
                 converted.append(out_name)
             except Exception as e:
                 print(f"Failed to convert {name}: {e}")
@@ -66,7 +62,8 @@ def delete_converted():
     for f in files:
         try:
             os.remove(os.path.join(CONVERTED_FOLDER, f))
-            os.remove(os.path.join(THUMBS_FOLDER, f))
+            # Optionally remove from thumbs if you create thumbs for PNGs
+            # os.remove(os.path.join(THUMBS_FOLDER, f))
         except Exception:
             pass
     return jsonify({"status": "deleted"})
