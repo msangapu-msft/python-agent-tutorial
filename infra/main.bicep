@@ -77,19 +77,34 @@ resource deploymentSlot 'Microsoft.Web/sites/slots@2022-09-01' = {
 }
 
 resource logSettings 'Microsoft.Web/sites/config@2022-09-01' = {
-  name: '${appName}/web'
+  name: '${appName}'
   dependsOn: [
     webApp
   ]
   properties: {
-    applicationLogging: {
-      fileSystem: {
-        level: 'Information'
-        retentionInDays: 3
+    logs: {
+      applicationLogs: {
+        fileSystem: {
+          level: 'Information'
+        }
+      }
+      httpLogs: {
+        fileSystem: {
+          retentionInMb: 35
+          retentionInDays: 3
+          enabled: true
+        }
+      }
+      detailedErrorMessages: {
+        enabled: true
+      }
+      failedRequestsTracing: {
+        enabled: true
       }
     }
   }
 }
+
 
 output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
 output appInsightsConnectionString string = appInsights.properties.ConnectionString

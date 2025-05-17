@@ -1,4 +1,4 @@
-name: image-converter-flask
+name: python-agent-tutorial
 metadata:
   template: local
 services:
