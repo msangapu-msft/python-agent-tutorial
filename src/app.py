@@ -14,7 +14,7 @@ UPLOAD_FOLDER = 'static/uploads'
 THUMBS_FOLDER = 'static/thumbs'
 CONVERTED_FOLDER = 'converted'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-MAX_IMAGES = 12  # To prevent abuse or memory overload
+MAX_IMAGES = 8  # To prevent abuse or memory overload
 
 # Ensure folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -68,12 +68,6 @@ def convert_selected():
                 out_name = os.path.splitext(name)[0] + '.png'
                 out_path = os.path.join(CONVERTED_FOLDER, out_name)
                 img.save(out_path, format='PNG')
-
-                # Generate thumbnail
-                img.thumbnail((150, 150))
-                thumb_path = os.path.join(THUMBS_FOLDER, out_name)
-                img.save(thumb_path, format='PNG')
-
                 converted.append(out_name)
         except UnidentifiedImageError:
             print(f"❌ Not a valid image file: {name}")
@@ -84,13 +78,8 @@ def convert_selected():
 
 @app.route('/delete', methods=['GET'])
 def delete_converted():
-    files = os.listdir(CONVERTED_FOLDER)
-    for f in files:
         try:
             os.remove(os.path.join(CONVERTED_FOLDER, f))
-            thumb_path = os.path.join(THUMBS_FOLDER, f)
-            if os.path.exists(thumb_path):
-                os.remove(thumb_path)
         except Exception as e:
             print(f"⚠️ Failed to delete {f}: {e}")
     return jsonify({"status": "deleted"})
