@@ -49,6 +49,7 @@ resource deploymentSlot 'Microsoft.Web/sites/slots@2022-09-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: 'PYTHON|3.13'
+      appCommandLine: '/home/site/wwwroot/startup.sh'  
       appSettings: [
         {
           name: 'MEMORY_BUG'
