@@ -2,12 +2,11 @@
 set -e
 
 if [ -f "slot-deploy.zip" ]; then
-  echo "🧹 Removing old slot-deploy.zip..."
-  rm slot-deploy.zip
+  echo "slot-deploy.zip already exists, reusing it."
+else
+  echo "Zipping source code for deployment to the 'broken' slot..."
+  zip -r slot-deploy.zip . -x ".git/*" "slot-deploy.zip" > /dev/null
 fi
-
-echo "Zipping source code for deployment to the 'broken' slot..."
-zip -r slot-deploy.zip . -x ".git/*" "slot-deploy.zip" > /dev/null
 
 # Correct variable names as per azd conventions
 APP_NAME=$(azd env get-values --output json | jq -r '.AZURE_WEB_APP_NAME')
@@ -29,3 +28,8 @@ az webapp deploy \
   --type zip
 
 echo "Broken slot deployment complete."
+
+if [ -f "slot-deploy.zip" ]; then
+  echo "🧹 Removing old slot-deploy.zip..."
+  rm slot-deploy.zip
+fi
