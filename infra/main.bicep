@@ -77,4 +77,4 @@ resource logSettings 'Microsoft.Web/sites/config@2022-09-01' = {
   }
 }
 
-output webAppName string = webApp.name
+output AZURE_WEB_APP_NAME string = webApp.name
