@@ -29,10 +29,13 @@ os.makedirs(THUMBS_FOLDER, exist_ok=True)
 
 def log_memory_usage(msg=""):
     process = psutil.Process(os.getpid())
-    mem_mb = process.memory_info().rss / 1024 / 1024
-    line = f"[MEMORY] {msg} Memory usage: {mem_mb:.2f} MB\n"
-    with open("/home/LogFiles/custom_memlog.txt", "a") as f:
-        f.write(line)
+    mem_mb = process.memory_info().rss / 1024 / 1024  # Memory used by this process
+    vmem = psutil.virtual_memory()
+    total_mb = vmem.total / 1024 / 1024
+    available_mb = vmem.available / 1024 / 1024
+    percent = vmem.percent
+    print(f"[MEMORY] {msg} | App Memory: {mem_mb:.2f} MB | Total System: {total_mb:.2f} MB | Available: {available_mb:.2f} MB | Usage: {percent}%")
+
 
 
 def allowed_file(filename):
