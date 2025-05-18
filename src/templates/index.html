@@ -11,8 +11,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
     <style>
-      img.selected { outline: 3px solid #007bff; }
-      .alert ul { margin-bottom: 0; }
+        img.selected { outline: 3px solid #007bff; }
+        .alert ul { margin-bottom: 0; }
+        /* Add more spacing around thumbnails */
+        .thumbnail {
+          display: block;
+          margin: 14px 0;           /* Vertical spacing between rows */
+          padding: 8px;
+          border-radius: 12px;
+          background: #f8f9fa;
+          transition: box-shadow 0.2s;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .thumbnail img {
+          margin: 0 8px 8px 0;      /* Extra spacing on the right and below each image */
+          border-radius: 8px;
+          display: block;
+        }
+        /* Add spacing between columns on small screens and up */
+        .convert-thumbs .col-sm-3 {
+          padding-left: 8px;
+          padding-right: 8px;
+          padding-bottom: 16px;
+        }
     </style>
   </head>
 
