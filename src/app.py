@@ -4,12 +4,14 @@ from PIL import Image, UnidentifiedImageError
 import os
 import psutil
 import traceback
+import sys
 
 from whitenoise import WhiteNoise
 
 app = Flask(__name__)
 app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
+sys.stdout.reconfigure(line_buffering=True)
 print("Starting Flask app...")
 
 # Config
