@@ -95,7 +95,6 @@ def convert_selected():
                 converted.append(os.path.basename(out_path))
 
             # Free memory and delete source file
-            os.remove(src)
             del img
             gc.collect()
             print_log(f"Converted and deleted {name}")
