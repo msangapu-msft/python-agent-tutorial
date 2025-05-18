@@ -52,7 +52,7 @@ def list_images():
 def convert_selected():
     # Broken slot memory bug
     if os.environ.get("MEMORY_BUG", "").lower() in ("1", "true", "yes"):
-    print("⚠️ MEMORY_BUG triggered: allocating lots of memory.")
+        print("⚠️ MEMORY_BUG triggered: allocating lots of memory.")
     try:
         big_list = []
         for _ in range(10**7):
