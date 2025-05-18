@@ -6,6 +6,8 @@ services:
     project: ./src
     language: python
     host: appservice
+    env:
+      AZURE_WEB_APP_NAME: ${webAppName}
 hooks:
   postprovision:
     run: ./.azure/hooks/postprovision.sh
