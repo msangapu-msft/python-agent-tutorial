@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
 import os
+import psutil
+import traceback
 
 from whitenoise import WhiteNoise
 
@@ -22,6 +24,11 @@ MAX_FILE_SIZE_MB = 16  # Optional: max 16 MB per file
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 os.makedirs(THUMBS_FOLDER, exist_ok=True)
+
+def log_memory_usage(msg=""):
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / 1024 / 1024  # Resident Set Size in MB
+    print(f"[MEMORY] {msg} Memory usage: {mem_mb:.2f} MB")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -46,6 +53,7 @@ def list_images():
 
 @app.route('/convert', methods=['GET'])
 def convert_selected():
+    log_memory_usage("Before starting conversions")
     image_names_raw = request.args.get('imgNames', '')
     image_names = image_names_raw.strip(',').split(',')
 
@@ -59,6 +67,7 @@ def convert_selected():
     errors = {}
 
     for name in image_names:
+        log_memory_usage(f"Before processing {name}")
         name = secure_filename(name.strip())
         if not name or not allowed_file(name):
             msg = f"Skipping invalid file: {name}"
@@ -94,6 +103,7 @@ def convert_selected():
                 out_path = os.path.join(CONVERTED_FOLDER, out_name)
                 img.save(out_path, format='PNG')
                 converted.append(out_name)
+                log_memory_usage(f"After processing {name}")
         except UnidentifiedImageError:
             msg = f"Not a valid image file: {name}"
             print("❌", msg)
@@ -102,6 +112,8 @@ def convert_selected():
             msg = f"Failed to convert {name}: {e}"
             print("❌", msg)
             errors[name] = msg
+
+    log_memory_usage("After all conversions")
 
     response = {"converted": converted}
     if errors:
@@ -126,7 +138,6 @@ def delete_converted():
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    import traceback
     print("⚠️ Unhandled Exception:", traceback.format_exc())
     return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
