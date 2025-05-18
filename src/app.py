@@ -28,12 +28,10 @@ os.makedirs(THUMBS_FOLDER, exist_ok=True)
 def log_memory_usage(msg=""):
     process = psutil.Process(os.getpid())
     mem_mb = process.memory_info().rss / 1024 / 1024  # Resident Set Size in MB
-    print("[MEMORY] {msg} Memory usage: {mem_mb:.2f} MB")
+    print(f"[MEMORY] {msg} Memory usage: {mem_mb:.2f} MB")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-log_memory_usage(f"Before processing {name}")
 
 @app.route('/')
 def index():
@@ -69,17 +67,17 @@ def convert_selected():
     errors = {}
 
     for name in image_names:
-        log_memory_usage("Before processing {name}")
+        log_memory_usage(f"Before processing {name}")
         name = secure_filename(name.strip())
         if not name or not allowed_file(name):
-            msg = "Skipping invalid file: {name}"
+            msg = f"Skipping invalid file: {name}"
             print("⚠️", msg)
             errors[name] = msg
             continue
 
         src_path = os.path.join(UPLOAD_FOLDER, name)
         if not os.path.exists(src_path):
-            msg = "File not found: {src_path}"
+            msg = f"File not found: {src_path}"
             print("⚠️", msg)
             errors[name] = msg
             continue
@@ -87,31 +85,31 @@ def convert_selected():
         # File size check
         try:
             file_size_mb = os.path.getsize(src_path) / (1024 * 1024)
-            print("Processing {name}: {file_size_mb:.2f} MB")
+            print(f"Processing {name}: {file_size_mb:.2f} MB")
             if file_size_mb > MAX_FILE_SIZE_MB:
-                msg = "File too large ({file_size_mb:.2f} MB > {MAX_FILE_SIZE_MB} MB)"
+                msg = f"File too large ({file_size_mb:.2f} MB > {MAX_FILE_SIZE_MB} MB)"
                 print("❌", msg)
                 errors[name] = msg
                 continue
         except Exception as e:
-            errors[name] = "Could not check file size: {e}"
+            errors[name] = f"Could not check file size: {e}"
             continue
 
         try:
             with Image.open(src_path) as img:
-                print("{name}: format={img.format}, size={img.size}, mode={img.mode}")
+                print(f"{name}: format={img.format}, size={img.size}, mode={img.mode}")
                 img = img.convert("RGB")
                 out_name = os.path.splitext(name)[0] + '.png'
                 out_path = os.path.join(CONVERTED_FOLDER, out_name)
                 img.save(out_path, format='PNG')
                 converted.append(out_name)
-                log_memory_usage("After processing {name}")
+                log_memory_usage(f"After processing {name}")
         except UnidentifiedImageError:
-            msg = "Not a valid image file: {name}"
+            msg = f"Not a valid image file: {name}"
             print("❌", msg)
             errors[name] = msg
         except Exception as e:
-            msg = "Failed to convert {name}: {e}"
+            msg = f"Failed to convert {name}: {e}"
             print("❌", msg)
             errors[name] = msg
 
@@ -134,7 +132,7 @@ def delete_converted():
             os.remove(os.path.join(CONVERTED_FOLDER, f))
             deleted.append(f)
         except Exception as e:
-            print("⚠️ Failed to delete {f}: {e}")
+            print(f"⚠️ Failed to delete {f}: {e}")
             failed.append(f)
     return jsonify({"status": "deleted", "deleted": deleted, "failed": failed})
 
@@ -142,7 +140,6 @@ def delete_converted():
 def handle_exception(e):
     print("⚠️ Unhandled Exception:", traceback.format_exc())
     return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
