@@ -78,11 +78,25 @@ def convert_selected():
             errors[name] = f"Size check failed: {e}"; continue
         try:
             with Image.open(src) as img:
-                img = img.convert("RGB")
-                out = os.path.join(CONVERTED_FOLDER, os.path.splitext(name)[0] + '.png')
-                img.save(out, format='PNG')
-                converted.append(os.path.basename(out))
+                print_log(f"{name}: format={img.format}, size={img.size}, mode={img.mode}")
+
+                # Optional: downsize large images to reduce memory footprint
+                if img.width > 1920 or img.height > 1920:
+                    img.thumbnail((1920, 1920))  # Maintains aspect ratio
+
+                img = img.convert("RGB")  # Conversion can still use memory
+                out_name = os.path.splitext(name)[0] + '.png'
+                out_path = os.path.join(CONVERTED_FOLDER, out_name)
+
+                # Save directly to disk to reduce in-memory footprint
+                with open(out_path, 'wb') as f:
+                    img.save(f, format='PNG')
+
+                converted.append(os.path.basename(out_path))
+
+            # Free memory and delete source file
             os.remove(src)
+            del img
             gc.collect()
             print_log(f"Converted and deleted {name}")
         except UnidentifiedImageError:
