@@ -27,19 +27,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 os.makedirs(THUMBS_FOLDER, exist_ok=True)
 
-def log_memory_usage(msg=""):
-    process = psutil.Process(os.getpid())
-    mem_mb = process.memory_info().rss / 1024 / 1024  # Memory used by this process
-    vmem = psutil.virtual_memory()
-    total_mb = vmem.total / 1024 / 1024
-    available_mb = vmem.available / 1024 / 1024
-    percent = vmem.percent
-    line = (f"[MEMORY] {msg} | App Memory: {mem_mb:.2f} MB | "
-            f"Total System: {total_mb:.2f} MB | Available: {available_mb:.2f} MB | Usage: {percent}%\n")
-    with open("/home/LogFiles/custom_memlog.txt", "a") as f:
-        f.write(line)
-        f.flush()  # Optional: force immediate write
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -63,7 +50,18 @@ def list_images():
 
 @app.route('/convert', methods=['GET'])
 def convert_selected():
-    log_memory_usage("Before starting conversions")
+    # Broken slot memory bug
+    if os.environ.get("MEMORY_BUG", "").lower() in ("1", "true", "yes"):
+    print("⚠️ MEMORY_BUG triggered: allocating lots of memory.")
+    try:
+        big_list = []
+        for _ in range(10**7):
+            big_list.append("X" * 1024)
+    except MemoryError:
+        print("❌ MemoryError caught and returned to user.")
+        return jsonify({"error": "MemoryError occurred!"}), 500
+
+
     image_names_raw = request.args.get('imgNames', '')
     image_names = image_names_raw.strip(',').split(',')
 
@@ -77,7 +75,6 @@ def convert_selected():
     errors = {}
 
     for name in image_names:
-        log_memory_usage(f"Before processing {name}")
         name = secure_filename(name.strip())
         if not name or not allowed_file(name):
             msg = f"Skipping invalid file: {name}"
@@ -113,7 +110,6 @@ def convert_selected():
                 out_path = os.path.join(CONVERTED_FOLDER, out_name)
                 img.save(out_path, format='PNG')
                 converted.append(out_name)
-                log_memory_usage(f"After processing {name}")
         except UnidentifiedImageError:
             msg = f"Not a valid image file: {name}"
             print("❌", msg)
@@ -122,8 +118,6 @@ def convert_selected():
             msg = f"Failed to convert {name}: {e}"
             print("❌", msg)
             errors[name] = msg
-
-    log_memory_usage("After all conversions")
 
     response = {"converted": converted}
     if errors:

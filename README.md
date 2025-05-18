@@ -1,7 +1,7 @@
 ---
 page_type: sample
 languages:
-- php
+- python
 products:
 - app-service
 description: "App Service Tutorial to be used with ttp://docs.microsoft.com/azure/app-service/tutorial-sre-agent."
@@ -22,30 +22,79 @@ Taxonomies for products and languages: https://review.docs.microsoft.com/new-hop
 
 This is a sample image app to be used with http://docs.microsoft.com/azure/app-service/tutorial-sre-agent. The app converts JPG images to PNG. A "code bug" has been introduced for the troubleshooting scenario.
 
-## Contents
+# Azure App Service SRE Memory Demo – Flask Image Converter
 
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
+This sample Flask web app is designed for Azure App Service SRE troubleshooting demos. The app allows you to upload, view, and convert JPG images to PNG, and can intentionally trigger memory exhaustion in a deployment slot for root cause analysis.
 
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `/images`             | Sample images.                        |
-| `/thumbs`      | Sample image thumbnails.      |
-| `50x.html`    | HTTP500 page for NGINX            |
-| `delete.php`    | Deletes converted images.             |
-| `index.html`    | Main page for app.             |
-| `listImages.php`        | List all images contained in images folder.             |
-| `process.php`           | Convert JPGs to PNGs.             |
-| `process.php_broken`    | Sample of broken file.             |
-| `process.php_working`   | Sample of fixed file.             |
-| `starter-template.css`  | CSS template             |
-| `startup.sh`  | Startup script that copies the 50x.html file         |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE`         | The license for the sample.                |
+---
 
-## Prerequisites / Steup / Running the sample / Key concepts
+## Features
 
-See http://docs.microsoft.com/azure/app-service/tutorial-sre-agent. 
+- Upload, list, and convert JPG images to PNG.
+- Deployment slot (e.g., "broken") can simulate an out-of-memory condition.
+- Toggle the memory bug on/off using the `MEMORY_BUG` app setting.
+- Built-in memory usage logging.
+
+---
+
+## Project Structure
+
+- `app.py` – Main Flask application.
+- `startup.sh` – Standard startup script.
+- `startup_broken.sh` – Startup script for the broken slot (optional).
+- `requirements.txt` – Python dependencies.
+- `main.bicep` – Azure Bicep template to provision the app and slot.
+- `static/` – Static files (including uploaded images and thumbnails).
+- `converted/` – Folder for converted PNG images.
+
+---
+
+## How It Works
+
+### 1. Production Slot
+
+- Normal app behavior.
+- No memory errors triggered.
+
+### 2. Broken Slot
+
+- Add the Azure App Setting: `MEMORY_BUG=1` (or `true` or `yes`).
+- When converting images, the app tries to allocate a huge list, simulating a **MemoryError**.
+- Demonstrates memory issues for SRE root cause analysis.
+
+---
+
+## Deploying to Azure
+
+You can deploy using **Azure Developer CLI (azd)**, **Bicep**, or through the **Azure Portal**.
+
+### Prerequisites
+
+- Azure Subscription
+- Python 3.13
+- [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
+
+### Quick Steps
+
+1. **Provision Resources**
+
+   ```sh
+   azd up
+   # OR
+   az deployment group create -f main.bicep -g <your-resource-group>
+
+
+2. **Deploy Code**
+    - Use Azure Portal, VS Code, or CLI to deploy your code to the App Service.
+
+3. **Set Up the Broken Slot**
+    - In Azure Portal, navigate to your App Service.
+    - Create a deployment slot (e.g., named broken).
+    - In the slot, add an app setting:
+        Name:  MEMORY_BUG
+        Value: 1
+    - Restart the slot if needed.
 
 ## Contributing
 

@@ -11,18 +11,6 @@ param location string = resourceGroup().location
 param slotName string = 'broken'
 
 
-@description('Name of the Application Insights resource')
-param appInsightsName string = '${appName}-ai'
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-  }
-}
-
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
   location: location
@@ -61,7 +49,12 @@ resource deploymentSlot 'Microsoft.Web/sites/slots@2022-09-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: 'PYTHON|3.13'
-      appCommandLine: '/home/site/wwwroot/startup_broken.sh'
+      appSettings: [
+        {
+          name: 'MEMORY_BUG'
+          value: '1'
+        }
+      ]
     }
   }
 }
@@ -92,17 +85,3 @@ resource logSettings 'Microsoft.Web/sites/config@2022-09-01' = {
     }
   }
 }
-
-resource appInsightsKey 'Microsoft.Web/sites/config@2022-09-01' = {
-  name: '${appName}/appsettings'
-  properties: {
-    'APPINSIGHTS_INSTRUMENTATIONKEY': appInsights.properties.InstrumentationKey
-    'APPLICATIONINSIGHTS_CONNECTION_STRING': appInsights.properties.ConnectionString
-    'ApplicationInsightsAgent_EXTENSION_VERSION': '~3'
-  }
-  dependsOn: [ webApp, appInsights ]
-}
-
-
-output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
