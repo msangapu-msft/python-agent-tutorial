@@ -34,9 +34,11 @@ def log_memory_usage(msg=""):
     total_mb = vmem.total / 1024 / 1024
     available_mb = vmem.available / 1024 / 1024
     percent = vmem.percent
-    print(f"[MEMORY] {msg} | App Memory: {mem_mb:.2f} MB | Total System: {total_mb:.2f} MB | Available: {available_mb:.2f} MB | Usage: {percent}%")
-
-
+    line = (f"[MEMORY] {msg} | App Memory: {mem_mb:.2f} MB | "
+            f"Total System: {total_mb:.2f} MB | Available: {available_mb:.2f} MB | Usage: {percent}%\n")
+    with open("/home/LogFiles/custom_memlog.txt", "a") as f:
+        f.write(line)
+        f.flush()  # Optional: force immediate write
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
