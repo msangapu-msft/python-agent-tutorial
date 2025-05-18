@@ -1,4 +1,4 @@
-import os, sys, traceback, psutil
+import os, sys, traceback, psutil, gc
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
@@ -83,6 +83,7 @@ def convert_selected():
                 img.save(out, format='PNG')
                 converted.append(os.path.basename(out))
             os.remove(src)
+            gc.collect()
             print_log(f"Converted and deleted {name}")
         except UnidentifiedImageError:
             errors[name] = f"{name} is not a valid image"
