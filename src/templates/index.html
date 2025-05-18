@@ -216,12 +216,12 @@
             document.getElementById('convertResult').innerHTML = msg;
 
             // Optionally auto-close modal if conversion was successful for any images
-            if (data.converted && data.converted.length) {
-              setTimeout(() => {
-                bootstrap.Modal.getInstance(convertModal).hide();
-                document.getElementById('convertResult').innerHTML = '';
-              }, 2000); // 2 seconds
-            }
+            //if (data.converted && data.converted.length) {
+            //  setTimeout(() => {
+            //    bootstrap.Modal.getInstance(convertModal).hide();
+            //    document.getElementById('convertResult').innerHTML = '';
+            //  }, 2000); // 2 seconds
+            //}
 
             document.getElementById('message').innerHTML = '';
           })
