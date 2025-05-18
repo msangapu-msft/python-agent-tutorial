@@ -6,3 +6,7 @@ services:
     project: ./src
     language: python
     host: appservice
+hooks:
+  postprovision:
+    run: ./.azure/hooks/postprovision.sh
+    shell: sh
