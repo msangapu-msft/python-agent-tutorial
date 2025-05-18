@@ -96,6 +96,32 @@ You can deploy using **Azure Developer CLI (azd)**, **Bicep**, or through the **
         Value: 1
     - Restart the slot if needed.
 
+## Testing
+
+### Production slot
+- Visit `https://<your-app-name>.azurewebsites.net`
+- Upload and convert images — should work normally.
+
+### Broken slot
+- Visit `https://<your-app-name>-broken.azurewebsites.net`
+- Try to convert images — you should see memory errors when `MEMORY_BUG` is set.
+
+---
+
+## Troubleshooting
+
+- Application logs are available in the `/home/LogFiles/` directory (access via Kudu/Advanced Tools or Azure Portal).
+- If you hit a `MemoryError`, verify your app setting and check the logs.
+- If conversions work normally in the main slot but fail in the slot with `MEMORY_BUG`, your setup is correct.
+
+---
+
+## Authors
+
+Created by **Mangesh Sangapu**  
+Sample app for SRE and Azure App Service troubleshooting tutorials.
+
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
